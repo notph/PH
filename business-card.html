@@ -75,36 +75,43 @@
           linear-gradient(135deg, var(--paper-warm), var(--paper));
       }
 
-      .card::after {
-        content: "";
+      .field {
         position: absolute;
         inset: 0;
         z-index: -1;
-        opacity: 0.52;
-        background-image:
-          linear-gradient(104deg, transparent 0 8%, var(--line) 8.2%, transparent 8.6% 100%),
-          linear-gradient(99deg, transparent 0 16%, var(--line) 16.2%, transparent 16.55% 100%),
-          linear-gradient(94deg, transparent 0 26%, var(--line-strong) 26.12%, transparent 26.42% 100%),
-          linear-gradient(88deg, transparent 0 38%, var(--line) 38.1%, transparent 38.46% 100%),
-          linear-gradient(82deg, transparent 0 51%, var(--line-strong) 51.16%, transparent 51.42% 100%),
-          linear-gradient(76deg, transparent 0 64%, var(--line) 64.14%, transparent 64.5% 100%),
-          linear-gradient(71deg, transparent 0 78%, var(--line) 78.16%, transparent 78.45% 100%);
-        background-size:
-          122mm 68mm,
-          108mm 64mm,
-          132mm 60mm,
-          116mm 70mm,
-          126mm 72mm,
-          112mm 58mm,
-          136mm 66mm;
-        background-position:
-          -31mm -11mm,
-          -23mm 4mm,
-          -34mm 13mm,
-          -18mm -6mm,
-          -38mm 22mm,
-          -20mm 18mm,
-          -42mm 1mm;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .field .isobath {
+        fill: none;
+        stroke: rgba(38, 63, 82, 0.25);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 0.42;
+      }
+
+      .field .isobath.deep {
+        stroke: rgba(38, 63, 82, 0.4);
+        stroke-width: 0.62;
+      }
+
+      .field .current {
+        fill: none;
+        stroke: rgba(78, 139, 184, 0.28);
+        stroke-linecap: round;
+        stroke-width: 0.34;
+      }
+
+      .field .wind {
+        stroke: rgba(11, 18, 32, 0.3);
+        stroke-linecap: round;
+        stroke-width: 0.28;
+      }
+
+      .field .sample {
+        fill: rgba(190, 112, 74, 0.64);
       }
 
       .card-front {
@@ -228,6 +235,26 @@
         opacity: 0.66;
       }
 
+      .night .field .isobath {
+        stroke: rgba(156, 194, 224, 0.19);
+      }
+
+      .night .field .isobath.deep {
+        stroke: rgba(156, 194, 224, 0.34);
+      }
+
+      .night .field .current {
+        stroke: rgba(180, 217, 245, 0.2);
+      }
+
+      .night .field .wind {
+        stroke: rgba(246, 244, 239, 0.25);
+      }
+
+      .night .field .sample {
+        fill: rgba(205, 154, 118, 0.72);
+      }
+
       .night .mark,
       .night .role,
       .night .statement small,
@@ -295,6 +322,25 @@
   <body>
     <main class="sheet" aria-label="Modeles de carte de visite">
       <article class="card card-front">
+        <svg class="field" viewBox="0 0 850 550" aria-hidden="true">
+          <path class="isobath deep" d="M-64 420 C70 354 158 394 246 320 C332 248 366 124 492 84 C602 49 706 92 916 -40" />
+          <path class="isobath" d="M-80 461 C62 392 174 430 270 348 C366 266 396 142 512 105 C618 70 708 118 926 0" />
+          <path class="isobath" d="M-55 501 C84 435 206 466 302 383 C406 292 428 180 542 145 C650 112 742 160 920 70" />
+          <path class="isobath deep" d="M114 612 C164 500 140 384 224 298 C304 216 434 228 510 152 C580 82 558 -20 642 -88" />
+          <path class="isobath" d="M168 620 C204 506 184 402 260 326 C344 241 460 258 546 177 C626 102 604 4 686 -72" />
+          <path class="isobath" d="M238 626 C264 512 246 428 316 356 C396 274 510 286 596 212 C690 130 670 42 740 -42" />
+          <path class="isobath" d="M486 600 C520 516 606 492 648 420 C696 338 650 276 708 196 C750 138 820 118 914 62" />
+          <path class="isobath" d="M542 614 C570 538 642 518 686 448 C736 370 700 308 748 238 C790 178 850 160 932 112" />
+          <path class="isobath deep" d="M-42 118 C74 88 146 110 236 74 C334 34 394 -30 516 -18 C594 -10 660 -26 746 -72" />
+          <path class="current" d="M48 174 C166 136 256 154 356 118 C458 82 546 10 696 28" />
+          <path class="current" d="M-34 270 C102 234 244 252 352 212 C456 174 542 110 738 120" />
+          <path class="current" d="M78 356 C198 334 328 352 436 312 C552 270 650 202 900 232" />
+          <path class="wind" d="M626 100 l28 -10 m-7 3 l9 7" />
+          <path class="wind" d="M682 158 l30 -6 m-8 2 l8 8" />
+          <path class="wind" d="M578 220 l25 -14 m-6 4 l10 5" />
+          <path class="wind" d="M650 306 l33 -3 m-9 1 l7 9" />
+          <circle class="sample" cx="756" cy="456" r="3.8" />
+        </svg>
         <div class="mark">philippeholub.com</div>
         <div class="identity">
           <h1>Philippe Holub</h1>
@@ -304,6 +350,23 @@
       </article>
 
       <article class="card card-back">
+        <svg class="field" viewBox="0 0 850 550" aria-hidden="true">
+          <path class="isobath deep" d="M-94 132 C56 92 170 116 284 76 C400 35 486 -48 650 -26 C748 -12 824 -44 944 -118" />
+          <path class="isobath" d="M-80 178 C62 136 176 162 300 116 C420 72 510 0 664 20 C764 33 836 4 948 -56" />
+          <path class="isobath" d="M-74 226 C68 184 192 210 320 162 C442 116 534 52 684 66 C786 76 856 55 940 8" />
+          <path class="isobath deep" d="M292 646 C344 532 310 440 386 350 C462 260 586 268 664 178 C734 96 714 12 804 -86" />
+          <path class="isobath" d="M356 644 C398 538 366 456 432 380 C506 294 626 304 706 210 C780 124 758 52 838 -28" />
+          <path class="isobath" d="M420 642 C452 546 426 484 482 410 C548 322 668 334 748 248 C826 164 810 96 872 32" />
+          <path class="isobath" d="M-82 486 C68 450 192 478 318 436 C452 390 542 330 698 344 C790 352 858 330 940 288" />
+          <path class="current" d="M-20 364 C102 310 214 326 328 292 C468 250 552 174 736 192" />
+          <path class="current" d="M84 446 C202 402 320 420 438 376 C564 330 668 272 904 298" />
+          <path class="wind" d="M114 92 l26 -8 m-6 2 l8 7" />
+          <path class="wind" d="M198 132 l30 -5 m-8 1 l8 8" />
+          <path class="wind" d="M690 386 l31 -8 m-8 2 l8 8" />
+          <path class="wind" d="M744 438 l26 -12 m-6 3 l9 7" />
+          <circle class="sample" cx="150" cy="300" r="3" />
+          <circle class="sample" cx="780" cy="130" r="2.4" />
+        </svg>
         <p class="statement">
           Visualiser l'invisible.
           <small>Conseil, produit, architecture et direction d'experience.</small>
@@ -316,6 +379,25 @@
       </article>
 
       <article class="card card-front night">
+        <svg class="field" viewBox="0 0 850 550" aria-hidden="true">
+          <path class="isobath deep" d="M-64 420 C70 354 158 394 246 320 C332 248 366 124 492 84 C602 49 706 92 916 -40" />
+          <path class="isobath" d="M-80 461 C62 392 174 430 270 348 C366 266 396 142 512 105 C618 70 708 118 926 0" />
+          <path class="isobath" d="M-55 501 C84 435 206 466 302 383 C406 292 428 180 542 145 C650 112 742 160 920 70" />
+          <path class="isobath deep" d="M114 612 C164 500 140 384 224 298 C304 216 434 228 510 152 C580 82 558 -20 642 -88" />
+          <path class="isobath" d="M168 620 C204 506 184 402 260 326 C344 241 460 258 546 177 C626 102 604 4 686 -72" />
+          <path class="isobath" d="M238 626 C264 512 246 428 316 356 C396 274 510 286 596 212 C690 130 670 42 740 -42" />
+          <path class="isobath" d="M486 600 C520 516 606 492 648 420 C696 338 650 276 708 196 C750 138 820 118 914 62" />
+          <path class="isobath" d="M542 614 C570 538 642 518 686 448 C736 370 700 308 748 238 C790 178 850 160 932 112" />
+          <path class="isobath deep" d="M-42 118 C74 88 146 110 236 74 C334 34 394 -30 516 -18 C594 -10 660 -26 746 -72" />
+          <path class="current" d="M48 174 C166 136 256 154 356 118 C458 82 546 10 696 28" />
+          <path class="current" d="M-34 270 C102 234 244 252 352 212 C456 174 542 110 738 120" />
+          <path class="current" d="M78 356 C198 334 328 352 436 312 C552 270 650 202 900 232" />
+          <path class="wind" d="M626 100 l28 -10 m-7 3 l9 7" />
+          <path class="wind" d="M682 158 l30 -6 m-8 2 l8 8" />
+          <path class="wind" d="M578 220 l25 -14 m-6 4 l10 5" />
+          <path class="wind" d="M650 306 l33 -3 m-9 1 l7 9" />
+          <circle class="sample" cx="756" cy="456" r="3.8" />
+        </svg>
         <div class="mark">philippeholub.com</div>
         <div class="identity">
           <h1>Philippe Holub</h1>
@@ -325,6 +407,23 @@
       </article>
 
       <article class="card card-back night">
+        <svg class="field" viewBox="0 0 850 550" aria-hidden="true">
+          <path class="isobath deep" d="M-94 132 C56 92 170 116 284 76 C400 35 486 -48 650 -26 C748 -12 824 -44 944 -118" />
+          <path class="isobath" d="M-80 178 C62 136 176 162 300 116 C420 72 510 0 664 20 C764 33 836 4 948 -56" />
+          <path class="isobath" d="M-74 226 C68 184 192 210 320 162 C442 116 534 52 684 66 C786 76 856 55 940 8" />
+          <path class="isobath deep" d="M292 646 C344 532 310 440 386 350 C462 260 586 268 664 178 C734 96 714 12 804 -86" />
+          <path class="isobath" d="M356 644 C398 538 366 456 432 380 C506 294 626 304 706 210 C780 124 758 52 838 -28" />
+          <path class="isobath" d="M420 642 C452 546 426 484 482 410 C548 322 668 334 748 248 C826 164 810 96 872 32" />
+          <path class="isobath" d="M-82 486 C68 450 192 478 318 436 C452 390 542 330 698 344 C790 352 858 330 940 288" />
+          <path class="current" d="M-20 364 C102 310 214 326 328 292 C468 250 552 174 736 192" />
+          <path class="current" d="M84 446 C202 402 320 420 438 376 C564 330 668 272 904 298" />
+          <path class="wind" d="M114 92 l26 -8 m-6 2 l8 7" />
+          <path class="wind" d="M198 132 l30 -5 m-8 1 l8 8" />
+          <path class="wind" d="M690 386 l31 -8 m-8 2 l8 8" />
+          <path class="wind" d="M744 438 l26 -12 m-6 3 l9 7" />
+          <circle class="sample" cx="150" cy="300" r="3" />
+          <circle class="sample" cx="780" cy="130" r="2.4" />
+        </svg>
         <p class="statement">
           Visualiser l'invisible.
           <small>Conseil, produit, architecture et direction d'experience.</small>
