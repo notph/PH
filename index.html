@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>philippeholub.com</title>
+    <style>
+      :root {
+        --bg: #f6f4ef;
+        --ink: #0b1220;
+        --muted: rgba(11, 18, 32, 0.62);
+        --view-accent: #4e8bb8;
+        color-scheme: light;
+      }
+
+      body[data-view="dawn"] {
+        --bg: #f7f1ea;
+        --ink: #11131a;
+        --muted: rgba(17, 19, 26, 0.64);
+        --view-accent: #be704a;
+        color-scheme: light;
+      }
+
+      body[data-view="dusk"] {
+        --bg: #111725;
+        --ink: #f4efe7;
+        --muted: rgba(244, 239, 231, 0.68);
+        --view-accent: #cd9a76;
+        color-scheme: dark;
+      }
+
+      body[data-theme="night"] {
+        --bg: #081220;
+        --ink: #f6f4ef;
+        --muted: rgba(246, 244, 239, 0.66);
+        --view-accent: #b4d9f5;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      body {
+        overflow-x: hidden;
+        font-family:
+          ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+          serif;
+      }
+
+      canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        opacity: 0;
+        touch-action: pan-y;
+        transition: opacity 220ms ease;
+      }
+
+      body[data-field-ready="true"] canvas {
+        opacity: 1;
+      }
+
+      .field-loader {
+        position: fixed;
+        right: clamp(18px, 3.6vw, 52px);
+        bottom: clamp(18px, 3.2vw, 42px);
+        z-index: 2;
+        width: 72px;
+        height: 1px;
+        overflow: hidden;
+        background: color-mix(in srgb, var(--ink) 12%, transparent);
+        opacity: 0;
+        pointer-events: none;
+        transform-origin: right center;
+        transition:
+          opacity 360ms ease,
+          transform 520ms cubic-bezier(0.2, 0.72, 0.18, 1);
+      }
+
+      .field-loader::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: color-mix(in srgb, var(--ink) 48%, transparent);
+        transform: translateX(-105%);
+        animation: field-loader-drift 1200ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+      }
+
+      body:not([data-field-ready="true"]) .field-loader {
+        opacity: 1;
+      }
+
+      body[data-field-ready="true"] .field-loader {
+        opacity: 0;
+        transform: scaleX(0.62);
+      }
+
+      @keyframes field-loader-drift {
+        0% {
+          transform: translateX(-105%);
+        }
+        54% {
+          transform: translateX(0%);
+        }
+        100% {
+          transform: translateX(108%);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        canvas,
+        .field-loader,
+        .field-loader::after,
+        .mark,
+        .view-switch,
+        main,
+        .copy,
+        .copy [data-content-zone],
+        .copy .kicker,
+        .copy .stance,
+        .copy .explore {
+          transition: none;
+          transform: none;
+          animation: none;
+          filter: none;
+        }
+      }
+
+      .mark {
+        position: fixed;
+        z-index: 2;
+        top: 28px;
+        left: clamp(24px, 7.7vw, 112px);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 12px;
+        line-height: 1;
+        color: color-mix(in srgb, var(--ink) 64%, transparent);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-3px);
+        transition:
+          opacity 520ms ease,
+          transform 520ms ease;
+      }
+
+      .view-switch {
+        position: fixed;
+        z-index: 3;
+        top: 20px;
+        right: clamp(16px, 3.5vw, 44px);
+        display: inline-grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: 84px;
+        height: 36px;
+        padding: 3px;
+        border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--bg) 76%, transparent);
+        box-shadow: 0 8px 28px color-mix(in srgb, var(--ink) 7%, transparent);
+        backdrop-filter: blur(14px);
+        opacity: 0;
+        pointer-events: auto;
+        transform: translateY(-3px);
+        transition:
+          opacity 520ms ease 90ms,
+          transform 520ms ease 90ms;
+      }
+
+      .view-switch::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        bottom: 3px;
+        left: 3px;
+        width: calc(50% - 3px);
+        border-radius: 999px;
+        background:
+          linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--view-accent) 26%, var(--bg)),
+            color-mix(in srgb, var(--ink) 15%, var(--bg))
+          );
+        transform: translateX(0);
+        transition: transform 240ms ease, background 240ms ease;
+      }
+
+      body[data-view="dusk"] .view-switch::before,
+      body[data-view="night"] .view-switch::before {
+        transform: translateX(100%);
+      }
+
+      .view-switch button {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: color-mix(in srgb, var(--ink) 58%, transparent);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 11px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .view-switch button[aria-pressed="true"] {
+        color: var(--ink);
+      }
+
+      .view-switch svg {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.7;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        min-height: 860vh;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition:
+          opacity 640ms ease 120ms,
+          transform 760ms cubic-bezier(0.2, 0.72, 0.18, 1) 120ms;
+      }
+
+      body[data-copy-ready="true"] .mark,
+      body[data-copy-ready="true"] .view-switch,
+      body[data-copy-ready="true"] main {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      section {
+        min-height: 112vh;
+        display: flex;
+        align-items: center;
+        padding: 16vh 24px 16vh clamp(24px, 7.7vw, 112px);
+      }
+
+      section:first-child {
+        padding-top: 18vh;
+      }
+
+      section:nth-child(2),
+      section:nth-child(6),
+      section:nth-child(8) {
+        justify-content: flex-end;
+        padding-right: clamp(24px, 11vw, 168px);
+      }
+
+      section:last-child {
+        align-items: flex-start;
+        padding-top: 32vh;
+      }
+
+      .copy {
+        width: min(1100px, calc(100vw - 48px));
+        opacity: 0.44;
+        transform: translateY(18px);
+        filter: blur(1.4px);
+        transition:
+          opacity 520ms ease,
+          transform 680ms cubic-bezier(0.2, 0.72, 0.18, 1),
+          filter 520ms ease;
+        will-change: opacity, transform, filter;
+      }
+
+      .copy.is-anchor-active {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+
+      .copy.is-anchor-leaving {
+        opacity: 0.32;
+        transform: translateY(-12px);
+        filter: blur(1.8px);
+        transition-duration: 300ms, 420ms, 300ms;
+      }
+
+      .copy[data-anchor-revealed="false"] [data-content-zone],
+      .copy[data-anchor-revealed="false"] .kicker,
+      .copy[data-anchor-revealed="false"] .stance,
+      .copy[data-anchor-revealed="false"] .explore {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      .copy [data-content-zone],
+      .copy .kicker,
+      .copy .stance,
+      .copy .explore {
+        transition:
+          opacity 620ms ease,
+          transform 760ms cubic-bezier(0.2, 0.72, 0.18, 1);
+        transition-delay: calc(var(--reveal-order, 0) * 72ms);
+      }
+
+      .copy.compact {
+        max-width: 650px;
+      }
+
+      .copy.narrow {
+        max-width: 520px;
+      }
+
+      .copy.wide {
+        max-width: 860px;
+      }
+
+      .copy.full {
+        max-width: 980px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+        letter-spacing: 0;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-weight: 400;
+        text-wrap: balance;
+      }
+
+      h1 {
+        max-width: 1100px;
+        font-size: 54px;
+        line-height: 1.01;
+      }
+
+      h2 {
+        font-size: 48px;
+        line-height: 1.04;
+      }
+
+      h3 {
+        max-width: 760px;
+        font-size: 36px;
+        line-height: 1.1;
+      }
+
+      .line {
+        display: block;
+        width: fit-content;
+        max-width: 100%;
+      }
+
+      .verbs {
+        width: fit-content;
+        max-width: 100%;
+        margin-top: 52px;
+        font-size: 34px;
+        line-height: 1.08;
+      }
+
+      .stance {
+        max-width: 54ch;
+        margin-top: 32px;
+        color: color-mix(in srgb, var(--ink) 78%, transparent);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .kicker {
+        margin-bottom: 34px;
+        color: color-mix(in srgb, var(--ink) 54%, transparent);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 12px;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .question {
+        max-width: 720px;
+      }
+
+      .territory {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        width: min(920px, calc(100vw - 48px));
+        margin-top: 54px;
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        pointer-events: auto;
+      }
+
+      .territory span {
+        min-height: 74px;
+        padding: 18px 18px 16px 0;
+        border-top: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+        color: color-mix(in srgb, var(--ink) 74%, transparent);
+        font-size: 14px;
+        line-height: 1.36;
+      }
+
+      .claim {
+        max-width: 940px;
+      }
+
+      .proofs {
+        display: grid;
+        grid-template-columns: 0.84fr 1.16fr;
+        gap: clamp(28px, 6vw, 86px);
+        width: min(980px, calc(100vw - 48px));
+        align-items: start;
+      }
+
+      .proof-list {
+        display: grid;
+        gap: 22px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      .proof-list li {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 18px;
+        padding-top: 18px;
+        border-top: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+      }
+
+      .proof-list strong {
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .proof-list span {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.45;
+      }
+
+      .proof-list em {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--ink);
+        font-style: normal;
+      }
+
+      .contact-line {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        align-items: center;
+        margin-top: 44px;
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        pointer-events: auto;
+      }
+
+      .contact-line a {
+        color: var(--ink);
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      .contact-line a:first-child {
+        padding-bottom: 3px;
+        border-bottom: 1px solid currentColor;
+      }
+
+      p {
+        max-width: 34ch;
+        margin-top: 34px;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1.45;
+        text-wrap: pretty;
+      }
+
+      .answer {
+        max-width: 38ch;
+      }
+
+      .copy.wide p {
+        max-width: 42ch;
+      }
+
+      .copy.compact p {
+        max-width: 33ch;
+      }
+
+      .explore {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 42px;
+        color: var(--ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 13px;
+        text-decoration: none;
+        pointer-events: auto;
+      }
+
+      .explore::after {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.84;
+      }
+
+      @media (max-width: 980px) {
+        h1 {
+          font-size: 50px;
+        }
+
+        h2 {
+          font-size: 42px;
+        }
+
+        .verbs {
+          margin-top: 44px;
+          font-size: 30px;
+        }
+
+        .territory {
+          grid-template-columns: 1fr;
+          gap: 10px;
+          margin-top: 38px;
+        }
+
+        .territory span {
+          min-height: auto;
+          padding: 14px 0 12px;
+        }
+
+        .proofs {
+          grid-template-columns: 1fr;
+        }
+
+        section:nth-child(2),
+        section:nth-child(6),
+        section:nth-child(8) {
+          justify-content: flex-start;
+          padding-right: 24px;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .mark {
+          top: 22px;
+          left: 24px;
+        }
+
+        body[data-page-scrolled="true"] .mark {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+
+        .view-switch {
+          top: auto;
+          bottom: 14px;
+          right: 16px;
+          width: 84px;
+          height: 32px;
+        }
+
+        section {
+          min-height: 118vh;
+          align-items: flex-start;
+          padding: 18vh 24px 12vh;
+        }
+
+        .copy,
+        .copy.compact {
+          width: calc(100vw - 48px);
+          max-width: calc(100vw - 48px);
+        }
+
+        h1 {
+          font-size: 39px;
+          line-height: 1.05;
+        }
+
+        h2 {
+          font-size: 34px;
+          line-height: 1.07;
+        }
+
+        h3 {
+          font-size: 27px;
+          line-height: 1.16;
+        }
+
+        .verbs {
+          margin-top: 38px;
+          font-size: 25px;
+          line-height: 1.16;
+        }
+
+        .stance {
+          max-width: 31ch;
+          font-size: 14px;
+        }
+
+        p {
+          max-width: 29ch;
+          font-size: 18px;
+          line-height: 1.44;
+        }
+
+        .answer,
+        .copy.wide p,
+        .copy.compact p {
+          max-width: 29ch;
+        }
+
+        .proof-list li {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .proof-list span {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="field" aria-hidden="true"></canvas>
+    <div class="field-loader" aria-hidden="true"></div>
+    <div class="mark">philippe holub</div>
+    <div class="view-switch" role="group" aria-label="Vue d'affichage">
+      <button type="button" data-view-choice="day" aria-label="Jour" title="Jour" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.8"></circle>
+          <path d="M12 2.8v2.4M12 18.8v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path>
+        </svg>
+        <span class="sr-only">Jour</span>
+      </button>
+      <button type="button" data-view-choice="night" aria-label="Nuit" title="Nuit" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18.3 15.6A7.2 7.2 0 0 1 8.4 5.7 7.2 7.2 0 1 0 18.3 15.6Z"></path>
+        </svg>
+        <span class="sr-only">Nuit</span>
+      </button>
+    </div>
+    <main>
+      <section data-anchor="beginning">
+        <div class="copy">
+          <h1 data-content-zone>
+            <span class="line">Les environnements changent.</span>
+            <span class="line">Les principes restent.</span>
+          </h1>
+          <p class="stance">
+            J'interviens quand les signaux, les usages et les contraintes doivent redevenir actionnables.
+          </p>
+          <a class="explore" href="#approche">Explorer</a>
+        </div>
+      </section>
+      <section id="approche" data-anchor="middle">
+        <div class="copy full">
+          <h2 class="claim" data-content-zone>
+            <span class="line">Clarifier les systèmes critiques.</span>
+            <span class="line">Puis les transformer sans les dénaturer.</span>
+          </h2>
+          <div class="territory" data-content-zone>
+            <span>Aide médicale augmentée par les données, les biomarqueurs et l'intelligence artificielle.</span>
+            <span>Plateformes métier utilisées tous les jours, où chaque friction a un coût réel.</span>
+            <span>Objets techniques façonnés par des contraintes physiques rarement visibles.</span>
+          </div>
+        </div>
+      </section>
+      <section data-anchor="middle">
+        <div class="copy compact">
+          <h2 data-content-zone>
+            <span class="line">Cartographier les contraintes avant de construire.</span>
+          </h2>
+          <p data-content-zone>
+            Le travail commence avant la solution : repérer les forces en présence, les usages réels et les endroits où l'arbitrage devient fragile.
+          </p>
+        </div>
+      </section>
+      <section data-anchor="middle">
+        <div class="copy wide">
+          <div class="kicker">Décider avec plus de confiance</div>
+          <h3 class="question" data-content-zone>
+            Comment soutenir le jugement médical sans le remplacer ?
+          </h3>
+          <p class="answer" data-content-zone>
+            Données, biomarqueurs, recommandations thérapeutiques et intelligence artificielle peuvent converger vers une information plus utile.
+          </p>
+          <p class="answer" data-content-zone>
+            Le sujet n'est pas le logiciel. Le sujet est la qualité de la décision.
+          </p>
+        </div>
+      </section>
+      <section data-anchor="middle">
+        <div class="proofs">
+          <div>
+            <div class="kicker">Ce qui reste après le diagnostic</div>
+            <h2 data-content-zone>
+              <span class="line">Des arbitrages plus nets.</span>
+              <span class="line">Des environnements moins opaques.</span>
+            </h2>
+          </div>
+          <ul class="proof-list" data-content-zone>
+            <li>
+              <strong>Santé</strong>
+              <span><em>Sécuriser l'arbitrage clinique.</em> Passer d'un faisceau de données à un support utilisable, sans effacer le jugement médical.</span>
+            </li>
+            <li>
+              <strong>Produit</strong>
+              <span><em>Faire évoluer sans désorganiser.</em> Modifier un outil quotidien sans rompre les habitudes qui le rendent utile.</span>
+            </li>
+            <li>
+              <strong>Physique</strong>
+              <span><em>Construire depuis ce qui ne se voit pas.</em> Relier forme, contraintes mécaniques et sensations quand le comportement dépend du réel.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section data-anchor="end">
+        <div class="copy wide">
+          <div class="kicker">Faire évoluer un système critique</div>
+          <h3 class="question" data-content-zone>
+            Comment faire évoluer une plateforme quotidienne sans alourdir le travail ?
+          </h3>
+          <p data-content-zone>
+            Un écosystème numérique installé dans les routines métier ne se remplace pas comme un objet isolé.
+          </p>
+          <p class="answer" data-content-zone>
+            Chaque évolution doit respecter les gestes acquis, les dépendances invisibles et les moments où la friction pèse vraiment.
+          </p>
+        </div>
+      </section>
+      <section data-anchor="end">
+        <div class="copy wide">
+          <div class="kicker">Concevoir depuis les forces</div>
+          <h3 class="question" data-content-zone>
+            Comment concevoir un foil quand l'essentiel se joue sous la surface ?
+          </h3>
+          <p class="answer" data-content-zone>
+            Portance, rigidité, appuis, vitesse : les sensations du rider révèlent ce que les forces produisent.
+          </p>
+          <p class="answer" data-content-zone>
+            Le prototype ne valide pas seulement une forme. Il relie ce que l'eau, la matière et la sensation produisent ensemble.
+          </p>
+        </div>
+      </section>
+      <section data-anchor="end">
+        <div class="copy wide">
+          <div class="kicker">Anticiper plutôt que réagir</div>
+          <h3 class="question" data-content-zone>
+            Comment repérer une trajectoire avant qu'elle ne devienne évidente ?
+          </h3>
+          <p class="answer" data-content-zone>
+            Le suivi de navigation et la prédiction de trajectoires révèlent les premiers écarts, avant qu'ils ne dominent la situation.
+          </p>
+          <p class="answer" data-content-zone>
+            La valeur est dans le moment gagné : voir plus tôt ce qui change, décider avant que l'option ne se referme.
+          </p>
+        </div>
+      </section>
+      <section data-anchor="end">
+        <div class="copy compact">
+          <h2 data-content-zone>
+            <span class="line">Comprendre les systèmes avant de les transformer.</span>
+          </h2>
+          <p data-content-zone>
+            Pour clarifier un système, faire évoluer un produit critique ou sécuriser un arbitrage, parlons-en.
+          </p>
+          <div class="contact-line" data-content-zone>
+            <a href="mailto:contact@philippeholub.com">contact@philippeholub.com</a>
+            <a href="#approche">Revoir l'approche</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { createProductionField } from "./src/generative/production-field.js?v=stable-field-20260703-scroll7";
+
+      const query = new URLSearchParams(window.location.search);
+      const canvas = document.getElementById("field");
+      const viewConfig = {
+        day: { theme: "light" },
+        dawn: { theme: "dawn" },
+        dusk: { theme: "dusk" },
+        night: { theme: "night" },
+      };
+      const requestedView = query.get("view");
+      const legacyTheme = query.get("theme");
+      let view = viewConfig[requestedView] ? requestedView : legacyTheme === "night" ? "night" : "day";
+      let theme = viewConfig[view].theme;
+      const forcedProgress = query.has("progress") ? Number.parseFloat(query.get("progress")) : null;
+      const forceReducedMotion = query.get("motion") === "reduce";
+      const pointerOff = query.get("pointer") === "off";
+      const viewButtons = [...document.querySelectorAll("[data-view-choice]")];
+
+      function syncViewControls(nextView) {
+        const activeChoice = nextView === "night" || nextView === "dusk" ? "night" : "day";
+        viewButtons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.viewChoice === activeChoice));
+        });
+      }
+
+      function applyView(nextView, { persist = false } = {}) {
+        view = viewConfig[nextView] ? nextView : "day";
+        theme = viewConfig[view].theme;
+        document.body.dataset.view = view;
+        document.body.dataset.theme = theme;
+        syncViewControls(view);
+
+        if (persist) {
+          const nextUrl = new URL(window.location.href);
+          nextUrl.searchParams.set("view", view);
+          nextUrl.searchParams.delete("theme");
+          window.history.replaceState(null, "", nextUrl);
+        }
+      }
+
+      applyView(view);
+
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const anchorSections = [...document.querySelectorAll("section[data-anchor]")];
+      const copies = anchorSections.map((section) => section.querySelector(".copy")).filter(Boolean);
+      let activeSection = null;
+
+      copies.forEach((copy) => {
+        const revealItems = [...copy.querySelectorAll("[data-content-zone], .kicker, .stance, .explore")];
+        revealItems.forEach((item, index) => {
+          item.style.setProperty("--reveal-order", String(index));
+        });
+        copy.dataset.anchorRevealed = "false";
+      });
+
+      function sectionDistanceFromFocus(section) {
+        const rect = section.getBoundingClientRect();
+        const focusY = window.innerHeight * (window.innerWidth < 680 ? 0.62 : 0.48);
+        if (rect.top <= focusY && rect.bottom >= focusY) return 0;
+        return Math.min(Math.abs(rect.top - focusY), Math.abs(rect.bottom - focusY));
+      }
+
+      function revealCopy(copy) {
+        if (prefersReducedMotion.matches || forceReducedMotion) {
+          copy.dataset.anchorRevealed = "true";
+          return;
+        }
+
+        copy.dataset.anchorRevealed = "false";
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            copy.dataset.anchorRevealed = "true";
+          });
+        });
+      }
+
+      function syncActiveAnchorText() {
+        document.body.dataset.pageScrolled = String(window.scrollY > 80);
+        if (anchorSections.length === 0) return;
+        const nextSection = anchorSections.reduce((best, section) =>
+          sectionDistanceFromFocus(section) < sectionDistanceFromFocus(best) ? section : best,
+        );
+        if (nextSection === activeSection) return;
+
+        const previousCopy = activeSection?.querySelector(".copy");
+        const nextCopy = nextSection.querySelector(".copy");
+        previousCopy?.classList.remove("is-anchor-active");
+        previousCopy?.classList.add("is-anchor-leaving");
+        window.setTimeout(() => previousCopy?.classList.remove("is-anchor-leaving"), 430);
+
+        nextCopy?.classList.remove("is-anchor-leaving");
+        nextCopy?.classList.add("is-anchor-active");
+        if (nextCopy) revealCopy(nextCopy);
+        activeSection = nextSection;
+      }
+
+      syncActiveAnchorText();
+      window.addEventListener("scroll", syncActiveAnchorText, { passive: true });
+      window.addEventListener("resize", syncActiveAnchorText, { passive: true });
+
+      window.requestAnimationFrame(() => {
+        document.body.dataset.copyReady = "true";
+        syncActiveAnchorText();
+      });
+
+      const field = createProductionField({
+        canvas,
+        theme,
+        seed: query.get("seed") || "PHASE20-A",
+        progress: Number.isFinite(forcedProgress) ? forcedProgress : undefined,
+        interaction: pointerOff ? "off" : "softDrift",
+        reducedMotion: forceReducedMotion,
+        mobileFirstImpression: false,
+        maxDpr: 1.35,
+        pointerEnabled: pointerOff ? false : undefined,
+        workerPath: "./workers/streamline-worker.js",
+      });
+
+      function markFieldReadyWhenComplete() {
+        const engine = field.snapshot()?.renderer?.field?.engine;
+        if (engine?.firstVisibleCommitMs) {
+          document.body.dataset.fieldReady = "true";
+          return;
+        }
+        window.requestAnimationFrame(markFieldReadyWhenComplete);
+      }
+
+      markFieldReadyWhenComplete();
+
+      viewButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const nextView = button.dataset.viewChoice;
+          applyView(nextView, { persist: true });
+          field.setTheme(theme);
+        });
+      });
+
+      window.__phRootSetProgress = (progress) => {
+        field.setProgress(progress);
+        return field.snapshot();
+      };
+
+      window.__phRootPointer = (x, y, strength = 1) => {
+        field.setPointer(x, y, strength);
+        return field.snapshot();
+      };
+
+      window.__phRootPointerLeave = () => {
+        field.releasePointer();
+        return field.snapshot();
+      };
+
+      window.__phRootSnapshot = () => ({
+        rootIntegration: true,
+        view,
+        theme,
+        forcedProgress: Number.isFinite(forcedProgress),
+        reducedMotion: forceReducedMotion || prefersReducedMotion.matches,
+        text: document.body.innerText.replace(/\s+/g, " ").trim(),
+        field: field.snapshot(),
+      });
+    </script>
+  </body>
+</html>
