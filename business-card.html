@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Carte de visite - Philippe Holub</title>
+    <style>
+      :root {
+        --paper: #f6f4ef;
+        --paper-warm: #f7f1ea;
+        --ink: #0b1220;
+        --muted: rgba(11, 18, 32, 0.58);
+        --line: rgba(38, 63, 82, 0.18);
+        --line-strong: rgba(38, 63, 82, 0.34);
+        --blue: #4e8bb8;
+        --amber: #be704a;
+        --night: #081220;
+        --night-ink: #f6f4ef;
+        --night-muted: rgba(246, 244, 239, 0.64);
+        --card-w: 85mm;
+        --card-h: 55mm;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        gap: 28px;
+        min-height: 100vh;
+        padding: 42px 24px;
+        background: #dedbd3;
+        color: var(--ink);
+        font-family:
+          ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+          serif;
+      }
+
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        width: min(100%, 760px);
+      }
+
+      .card {
+        position: relative;
+        width: var(--card-w);
+        height: var(--card-h);
+        overflow: hidden;
+        border-radius: 7px;
+        background: var(--paper);
+        box-shadow:
+          0 24px 64px rgba(11, 18, 32, 0.16),
+          0 0 0 1px rgba(11, 18, 32, 0.08);
+        isolation: isolate;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: -22mm -16mm -12mm -12mm;
+        z-index: -2;
+        background:
+          radial-gradient(circle at 72% 24%, rgba(78, 139, 184, 0.16), transparent 28%),
+          radial-gradient(circle at 22% 78%, rgba(190, 112, 74, 0.12), transparent 25%),
+          linear-gradient(135deg, var(--paper-warm), var(--paper));
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        opacity: 0.52;
+        background-image:
+          linear-gradient(104deg, transparent 0 8%, var(--line) 8.2%, transparent 8.6% 100%),
+          linear-gradient(99deg, transparent 0 16%, var(--line) 16.2%, transparent 16.55% 100%),
+          linear-gradient(94deg, transparent 0 26%, var(--line-strong) 26.12%, transparent 26.42% 100%),
+          linear-gradient(88deg, transparent 0 38%, var(--line) 38.1%, transparent 38.46% 100%),
+          linear-gradient(82deg, transparent 0 51%, var(--line-strong) 51.16%, transparent 51.42% 100%),
+          linear-gradient(76deg, transparent 0 64%, var(--line) 64.14%, transparent 64.5% 100%),
+          linear-gradient(71deg, transparent 0 78%, var(--line) 78.16%, transparent 78.45% 100%);
+        background-size:
+          122mm 68mm,
+          108mm 64mm,
+          132mm 60mm,
+          116mm 70mm,
+          126mm 72mm,
+          112mm 58mm,
+          136mm 66mm;
+        background-position:
+          -31mm -11mm,
+          -23mm 4mm,
+          -34mm 13mm,
+          -18mm -6mm,
+          -38mm 22mm,
+          -20mm 18mm,
+          -42mm 1mm;
+      }
+
+      .card-front {
+        padding: 9mm 8.5mm 7.5mm;
+      }
+
+      .mark {
+        position: absolute;
+        top: 7mm;
+        left: 8.5mm;
+        color: rgba(11, 18, 32, 0.52);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 7px;
+        letter-spacing: 0;
+      }
+
+      .identity {
+        position: absolute;
+        left: 8.5mm;
+        right: 9mm;
+        bottom: 8mm;
+      }
+
+      h1,
+      p {
+        margin: 0;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        max-width: 58mm;
+        font-size: 23px;
+        font-weight: 400;
+        line-height: 0.98;
+        text-wrap: balance;
+      }
+
+      .role {
+        max-width: 46mm;
+        margin-top: 5.5mm;
+        color: var(--muted);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 8px;
+        line-height: 1.45;
+      }
+
+      .measure {
+        position: absolute;
+        right: 8.5mm;
+        bottom: 8.5mm;
+        width: 1.8mm;
+        height: 1.8mm;
+        border-radius: 50%;
+        background: var(--blue);
+        box-shadow: 0 0 0 3.2mm rgba(78, 139, 184, 0.08);
+      }
+
+      .card-back {
+        display: grid;
+        grid-template-columns: 1fr 30mm;
+        gap: 7mm;
+        padding: 8mm 8.5mm;
+      }
+
+      .card-back::before {
+        background:
+          radial-gradient(circle at 86% 18%, rgba(190, 112, 74, 0.14), transparent 25%),
+          linear-gradient(135deg, var(--paper), #f2eee6);
+      }
+
+      .contact {
+        align-self: end;
+        display: grid;
+        gap: 2.7mm;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .contact a,
+      .contact span {
+        color: var(--ink);
+        font-size: 8px;
+        line-height: 1.1;
+        text-decoration: none;
+      }
+
+      .contact .quiet {
+        color: var(--muted);
+      }
+
+      .statement {
+        align-self: start;
+        color: rgba(11, 18, 32, 0.74);
+        font-size: 13px;
+        line-height: 1.13;
+      }
+
+      .statement small {
+        display: block;
+        margin-top: 4mm;
+        color: rgba(11, 18, 32, 0.5);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 6.8px;
+        line-height: 1.35;
+      }
+
+      .night {
+        background: var(--night);
+        color: var(--night-ink);
+      }
+
+      .night::before {
+        background:
+          radial-gradient(circle at 74% 22%, rgba(180, 217, 245, 0.14), transparent 27%),
+          radial-gradient(circle at 18% 82%, rgba(205, 154, 118, 0.12), transparent 25%),
+          linear-gradient(135deg, #081220, #111725);
+      }
+
+      .night::after {
+        --line: rgba(156, 194, 224, 0.18);
+        --line-strong: rgba(156, 194, 224, 0.32);
+        opacity: 0.66;
+      }
+
+      .night .mark,
+      .night .role,
+      .night .statement small,
+      .night .contact .quiet {
+        color: var(--night-muted);
+      }
+
+      .night .contact a,
+      .night .contact span,
+      .night .statement {
+        color: var(--night-ink);
+      }
+
+      .night .measure {
+        background: #b4d9f5;
+        box-shadow: 0 0 0 3.2mm rgba(180, 217, 245, 0.08);
+      }
+
+      .notes {
+        width: min(100%, 760px);
+        color: rgba(11, 18, 32, 0.62);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 760px) {
+        .sheet {
+          grid-template-columns: 1fr;
+          justify-items: center;
+        }
+      }
+
+      @page {
+        size: A4;
+        margin: 14mm;
+      }
+
+      @media print {
+        body {
+          display: block;
+          min-height: 0;
+          padding: 0;
+          background: white;
+        }
+
+        .sheet {
+          grid-template-columns: repeat(2, var(--card-w));
+          gap: 10mm;
+          width: auto;
+        }
+
+        .card {
+          break-inside: avoid;
+          box-shadow: none;
+          border-radius: 0;
+        }
+
+        .notes {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sheet" aria-label="Modeles de carte de visite">
+      <article class="card card-front">
+        <div class="mark">philippeholub.com</div>
+        <div class="identity">
+          <h1>Philippe Holub</h1>
+          <p class="role">Strategie, systemes complexes et experiences numeriques sobres.</p>
+        </div>
+        <div class="measure" aria-hidden="true"></div>
+      </article>
+
+      <article class="card card-back">
+        <p class="statement">
+          Visualiser l'invisible.
+          <small>Conseil, produit, architecture et direction d'experience.</small>
+        </p>
+        <div class="contact">
+          <a href="mailto:bonjour@philippeholub.com">bonjour@philippeholub.com</a>
+          <a href="https://philippeholub.com">philippeholub.com</a>
+          <span class="quiet">Tahiti / Paris</span>
+        </div>
+      </article>
+
+      <article class="card card-front night">
+        <div class="mark">philippeholub.com</div>
+        <div class="identity">
+          <h1>Philippe Holub</h1>
+          <p class="role">Strategie, systemes complexes et experiences numeriques sobres.</p>
+        </div>
+        <div class="measure" aria-hidden="true"></div>
+      </article>
+
+      <article class="card card-back night">
+        <p class="statement">
+          Visualiser l'invisible.
+          <small>Conseil, produit, architecture et direction d'experience.</small>
+        </p>
+        <div class="contact">
+          <a href="mailto:bonjour@philippeholub.com">bonjour@philippeholub.com</a>
+          <a href="https://philippeholub.com">philippeholub.com</a>
+          <span class="quiet">Tahiti / Paris</span>
+        </div>
+      </article>
+    </main>
+    <p class="notes">
+      Format imprime: 85 x 55 mm. Les textes sont volontairement sobres et modifiables directement dans ce fichier.
+    </p>
+  </body>
+</html>
