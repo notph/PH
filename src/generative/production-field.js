@@ -32,14 +32,29 @@ function defaultScrollProgress() {
 
 function contentRectsFrom(selector) {
   const zones = [...document.querySelectorAll(selector)];
-  return () =>
-    zones.flatMap((zone) => {
+  let cachedKey = "";
+  let cachedRects = [];
+
+  return () => {
+    const key = [
+      window.scrollX,
+      window.scrollY,
+      window.innerWidth,
+      window.innerHeight,
+      document.fonts?.status || "unknown",
+    ].join(":");
+    if (key === cachedKey) return cachedRects;
+
+    cachedKey = key;
+    cachedRects = zones.flatMap((zone) => {
       const range = document.createRange();
       range.selectNodeContents(zone);
       const rects = [...range.getClientRects()].filter((rect) => rect.width > 3 && rect.height > 3);
       range.detach();
       return rects.length ? rects : [zone.getBoundingClientRect()];
     }).filter((rect) => rect.bottom > -180 && rect.top < window.innerHeight + 180);
+    return cachedRects;
+  };
 }
 
 function resolveTheme(requestedTheme) {

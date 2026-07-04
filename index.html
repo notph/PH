@@ -822,7 +822,7 @@
             Pour clarifier un système, faire évoluer un produit critique ou sécuriser un arbitrage, parlons-en.
           </p>
           <div class="contact-line" data-content-zone>
-            <a href="mailto:contact@philippeholub.com">contact@philippeholub.com</a>
+            <a href="mailto:hello@philippeholub.com">hello@philippeholub.com</a>
             <a href="#approche">Revoir l'approche</a>
           </div>
         </div>
@@ -877,6 +877,7 @@
       const anchorSections = [...document.querySelectorAll("section[data-anchor]")];
       const copies = anchorSections.map((section) => section.querySelector(".copy")).filter(Boolean);
       let activeSection = null;
+      let activeAnchorRaf = 0;
 
       copies.forEach((copy) => {
         const revealItems = [...copy.querySelectorAll("[data-content-zone], .kicker, .stance, .explore")];
@@ -910,9 +911,15 @@
       function syncActiveAnchorText() {
         document.body.dataset.pageScrolled = String(window.scrollY > 80);
         if (anchorSections.length === 0) return;
-        const nextSection = anchorSections.reduce((best, section) =>
-          sectionDistanceFromFocus(section) < sectionDistanceFromFocus(best) ? section : best,
-        );
+        let nextSection = anchorSections[0];
+        let nextDistance = sectionDistanceFromFocus(nextSection);
+        for (let index = 1; index < anchorSections.length; index += 1) {
+          const distance = sectionDistanceFromFocus(anchorSections[index]);
+          if (distance < nextDistance) {
+            nextSection = anchorSections[index];
+            nextDistance = distance;
+          }
+        }
         if (nextSection === activeSection) return;
 
         const previousCopy = activeSection?.querySelector(".copy");
@@ -927,9 +934,17 @@
         activeSection = nextSection;
       }
 
+      function scheduleActiveAnchorTextSync() {
+        if (activeAnchorRaf) return;
+        activeAnchorRaf = window.requestAnimationFrame(() => {
+          activeAnchorRaf = 0;
+          syncActiveAnchorText();
+        });
+      }
+
       syncActiveAnchorText();
-      window.addEventListener("scroll", syncActiveAnchorText, { passive: true });
-      window.addEventListener("resize", syncActiveAnchorText, { passive: true });
+      window.addEventListener("scroll", scheduleActiveAnchorTextSync, { passive: true });
+      window.addEventListener("resize", scheduleActiveAnchorTextSync, { passive: true });
 
       window.requestAnimationFrame(() => {
         document.body.dataset.copyReady = "true";

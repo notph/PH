@@ -46,6 +46,9 @@ export class FieldRenderer {
     this.engine = null;
     this.resizeTimer = 0;
     this.scrollRaf = 0;
+    this.pointerRaf = 0;
+    this.pendingPointer = null;
+    this.canvasRect = null;
     this.onScroll = this.onScroll.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerLeave = this.onPointerLeave.bind(this);
@@ -64,11 +67,14 @@ export class FieldRenderer {
       contentProvider: this.contentProvider,
     });
 
+    this.canvasRect = rect;
     window.addEventListener("scroll", this.onScroll, { passive: true });
-    window.addEventListener("resize", this.onResize);
-    this.pointerTarget.addEventListener("pointermove", this.onPointerMove, { passive: true });
-    this.pointerTarget.addEventListener("pointerleave", this.onPointerLeave, { passive: true });
-    this.pointerTarget.addEventListener("pointercancel", this.onPointerLeave, { passive: true });
+    window.addEventListener("resize", this.onResize, { passive: true });
+    if (this.options.pointerEnabled !== false) {
+      this.pointerTarget.addEventListener("pointermove", this.onPointerMove, { passive: true });
+      this.pointerTarget.addEventListener("pointerleave", this.onPointerLeave, { passive: true });
+      this.pointerTarget.addEventListener("pointercancel", this.onPointerLeave, { passive: true });
+    }
     return this;
   }
 
@@ -84,11 +90,18 @@ export class FieldRenderer {
 
   onPointerMove(event) {
     if (!this.engine) return;
-    const rect = this.canvas.getBoundingClientRect();
-    this.engine.setPointer(event.clientX - rect.left, event.clientY - rect.top, 1);
+    this.pendingPointer = { x: event.clientX, y: event.clientY };
+    if (this.pointerRaf) return;
+    this.pointerRaf = window.requestAnimationFrame(() => {
+      this.pointerRaf = 0;
+      if (!this.engine || !this.pendingPointer) return;
+      const rect = this.canvasRect || this.canvas.getBoundingClientRect();
+      this.engine.setPointer(this.pendingPointer.x - rect.left, this.pendingPointer.y - rect.top, 1);
+    });
   }
 
   onPointerLeave() {
+    this.pendingPointer = null;
     this.engine?.releasePointer();
   }
 
@@ -97,6 +110,7 @@ export class FieldRenderer {
     this.resizeTimer = window.setTimeout(() => {
       if (!this.engine) return;
       const rect = this.canvas.getBoundingClientRect();
+      this.canvasRect = rect;
       this.engine.update({
         reducedMotion: this.reducedMotionProvider(),
         viewportWidth: rect.width,
@@ -113,6 +127,7 @@ export class FieldRenderer {
   update(options = {}) {
     this.options = { ...this.options, ...options };
     const rect = this.canvas.getBoundingClientRect();
+    this.canvasRect = rect;
     this.engine?.update({
       ...this.options,
       reducedMotion: this.reducedMotionProvider(),
@@ -156,7 +171,10 @@ export class FieldRenderer {
     this.pointerTarget.removeEventListener("pointercancel", this.onPointerLeave);
     window.clearTimeout(this.resizeTimer);
     if (this.scrollRaf) window.cancelAnimationFrame(this.scrollRaf);
+    if (this.pointerRaf) window.cancelAnimationFrame(this.pointerRaf);
     this.scrollRaf = 0;
+    this.pointerRaf = 0;
+    this.pendingPointer = null;
     this.engine?.destroy();
     this.engine = null;
   }
