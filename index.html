@@ -386,6 +386,17 @@
         max-width: 100%;
       }
 
+      .editorial-line {
+        display: block;
+        width: fit-content;
+        max-width: 100%;
+      }
+
+      .line.keep-together {
+        max-width: none;
+        white-space: nowrap;
+      }
+
       .verbs {
         width: fit-content;
         max-width: 100%;
@@ -447,7 +458,7 @@
 
       .proofs {
         display: grid;
-        grid-template-columns: minmax(400px, 0.96fr) minmax(0, 1.04fr);
+        grid-template-columns: minmax(510px, 0.96fr) minmax(0, 1.04fr);
         gap: clamp(36px, 5vw, 72px);
         width: min(1080px, calc(100vw - 48px));
         align-items: start;
@@ -538,6 +549,10 @@
         max-width: 33ch;
       }
 
+      .copy.compact p.editorial-copy {
+        max-width: 46ch;
+      }
+
       .explore {
         display: inline-flex;
         align-items: center;
@@ -588,6 +603,11 @@
 
         .proofs {
           grid-template-columns: 1fr;
+        }
+
+        .line.keep-together {
+          max-width: 100%;
+          white-space: normal;
         }
 
         section:nth-child(2),
@@ -663,8 +683,15 @@
 
         .answer,
         .copy.wide p,
-        .copy.compact p {
+        .copy.compact p,
+        .copy.compact p.editorial-copy {
           max-width: 29ch;
+        }
+
+        .editorial-line {
+          display: inline;
+          width: auto;
+          max-width: none;
         }
 
         .proof-list li {
@@ -728,8 +755,10 @@
           <h2 data-content-zone>
             <span class="line">Cartographier les contraintes avant de construire.</span>
           </h2>
-          <p data-content-zone>
-            Le travail commence avant la solution : repérer les forces en présence, les usages réels et les endroits où l'arbitrage devient fragile.
+          <p class="editorial-copy" data-content-zone>
+            <span class="editorial-line">Le travail commence avant la solution :</span>
+            <span class="editorial-line">repérer les forces en présence, les usages réels</span>
+            <span class="editorial-line">et les endroits où l'arbitrage devient fragile.</span>
           </p>
         </div>
       </section>
@@ -743,7 +772,8 @@
             Données, biomarqueurs, recommandations thérapeutiques et intelligence artificielle peuvent converger vers une information plus utile.
           </p>
           <p class="answer" data-content-zone>
-            Le sujet n'est pas le logiciel. Le sujet est la qualité de la décision.
+            <span class="editorial-line">Le sujet n'est pas le logiciel.</span>
+            <span class="editorial-line">Le sujet est la qualité de la décision.</span>
           </p>
         </div>
       </section>
@@ -752,7 +782,7 @@
           <div>
             <div class="kicker">Ce qui reste après le diagnostic</div>
             <h2 data-content-zone>
-              <span class="line">Des arbitrages plus nets.</span>
+              <span class="line keep-together">Des arbitrages plus nets.</span>
               <span class="line">Des environnements moins opaques.</span>
             </h2>
           </div>
