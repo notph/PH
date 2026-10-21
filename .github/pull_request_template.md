@@ -10,4 +10,4 @@ Pour un changement visuel, joindre une capture si elle aide la validation.
 ## Livraison
 
 Préciser les éventuelles migrations, la sauvegarde ou le retour arrière nécessaires.
-La fusion et la mise en production suivent la validation du propriétaire.
+Codex peut fusionner cette PR en squash après vérification, dans le périmètre de la tâche autorisée. Documenter les contrôles et les éventuels déploiements automatiques. Les releases, déploiements distincts et migrations de production suivent leur autorisation spécifique.
